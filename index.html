@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RGB 2 gray</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+  </head>
+  <body>
+    <div class="container">
+      <div class="mb-3">
+        <h1 class="form-title">百度地图配色 ==> 导出灰度配色JSON</h1>
+      </div>
+      <div class="mb-3">
+        <label for="required" class="form-label">复制JSON</label>
+        <textarea class="form-control" id="required" rows="10"></textarea>
+      </div>
+      <div class="mb-3">
+        <button type="button" class="btn btn-primary" id="start">转化</button>
+        <button type="button" class="btn btn-main" id="copy">复制结果到剪贴板</button>
+      </div>
+      <div class="mb-3">
+        <label for="response" class="form-label">转换结果</label>
+        <textarea class="form-control" id="response" rows="10"></textarea>
+      </div>
+    </div>
+    <script>
+      let btn = document.querySelector('#start')
+      let required = document.querySelector('#required')
+      let response = document.querySelector('#response')
+      const rgb2gary = (color) => {
+        let R = parseInt('0X' + color.slice(1,3))
+        let G = parseInt('0X' + color.slice(3,5))
+        let B = parseInt('0X' + color.slice(5,7))
+        let newColor = (R*299 + G*587 + B*114 + 500) / 1000 // RGB to gary
+        let newGray = parseInt(newColor).toString(16)
+        // console.log('newColor', R, G, B, `#${newGray}${newGray}${newGray}${color.slice(7,9)}`, color)
+        return `#${newGray}${newGray}${newGray}${color.slice(7,9)}`
+      }
+      btn.onclick = function () {
+        let res = []
+        // console.log('btn', this, required.value)
+        if (required.value && required.value !== null) {
+          try {
+            let jsonData = JSON.parse(required.value)
+            for (let index = 0; index < jsonData.length; index++) {
+              const item = jsonData[index];
+              console.log('btn 2', item)
+              if (item.stylers && item.stylers.color) {
+                item.stylers.color = rgb2gary(item.stylers.color)
+              }
+              res.push(item)
+            }
+            response.value = JSON.stringify(res)
+          } catch (error) {
+            alert('Error: 请检查JSON格式')
+          }
+        } else {
+          alert('Error: 输入JSON')
+        }
+      }
+      const btnCopy = document.querySelector('#copy');
+      btnCopy.addEventListener('click', () => {
+        response.select();
+        if (document.execCommand('copy')) {
+          document.execCommand('copy');
+          alert('复制成功');
+        }
+      })
+    </script>   
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+  </body>
+</html>
